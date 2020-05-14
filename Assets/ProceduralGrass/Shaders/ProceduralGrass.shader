@@ -98,6 +98,17 @@ Shader "Custom/ProceduralGrass"
                 return frac(sin(dot(f.xy, float2(12.9898, 78.233))) * 43758.5453);
             }
 
+            float4x4 rotationMatrixY(float angle)
+            {
+                float4x4 mat = float4x4(
+                    cos(angle), 0, -sin(angle), 0,
+                    0,          1,           0, 0,
+                    sin(angle), 0,  cos(angle), 0,
+                    0,          0,           0, 1
+                    );
+                return mat;
+            }
+
             v2g vert(appdata v)
             {
                 v2g o;
@@ -150,7 +161,7 @@ Shader "Custom/ProceduralGrass"
 
                 // 回転を算出（3頂点の平均）
                 float r = (input[0].rotation + input[1].rotation + input[2].rotation) / 3.0f;
-                r -= 0.5;
+                r = r - 0.5;
 
                 float4 dir = float4(((p2 - p0) * r).xyz, 1);
                 dir = normalize(dir);
