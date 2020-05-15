@@ -27,6 +27,14 @@ Shader "Custom/ProceduralGrass"
         _MiddleHeight("Middle Height", Range(0, 1)) = 0.4
         _TopHeight("Top Height", Range(0, 1)) = 0.5
 
+        // 草の各部の曲がり具合
+        _BottomBend("Bottom Bend", Float) = 1
+        _MiddleBend("Middle Bend", Float) = 1
+        _TopBend("Top Bend", Float) = 2
+
+        // 風邪の強さ
+        _WindForce("Wind Force", Float) = 1
+
         // テクスチャマップ
         [NoScaleOffset] _HeightTex("Height Texture", 2D) = "gray"{}
         [NoScaleOffset] _RotationTex("Rotation Texture", 2D) = "gray"{}
@@ -64,6 +72,7 @@ Shader "Custom/ProceduralGrass"
                 float3 normal : NORMAL;
                 float3 height : TEXCOORD0;
                 float3 rotation : TEXCOORD1;
+                float3 wind : TEXCOORD2;
             };
 
             struct g2f
@@ -87,6 +96,11 @@ Shader "Custom/ProceduralGrass"
             float _BottomWidth, _MiddleWidth, _TopWidth;
             // それぞれの高さ（下部、中間部、上部）
             float _BottomHeight, _MiddleHeight, _TopHeight;
+            // それぞれの曲がり具合（下部、中間部、上部）
+            float _BottomBend, _MiddleBend, _TopBend;
+
+            // 曲がる強さ
+            float _WindForce;
 
             // テクスチャマップ
             sampler2D _HeightTex;
@@ -116,6 +130,7 @@ Shader "Custom/ProceduralGrass"
                 o.normal = v.normal;
                 o.height = tex2Dlod(_HeightTex, float4(v.uv, 0, 0));
                 o.rotation = tex2Dlod(_RotationTex, float4(v.uv, 0, 0));
+                o.wind = tex2Dlod(_WindTex, float4(v.uv, 0, 0));
                 return o;
             }
 
@@ -196,6 +211,15 @@ Shader "Custom/ProceduralGrass"
                     float4 topPos = float4(center.x, o[5].pos.y, center.z, 1);
                     o[6].pos = topPos + (normal * topHeight);
                     o[6].col = _TopColor;
+
+                    // wind
+                    dir = float4(1, 0, 0, 1);
+                    float wind = (input[0].wind, input[1].wind, input[2].wind) / 3.0;
+                    o[2].pos += dir * wind * _WindForce * sin(_Time) * _BottomBend;
+                    o[3].pos += dir * wind * _WindForce * sin(_Time) * _BottomBend;
+                    o[4].pos += dir * wind * _WindForce * sin(_Time) * _MiddleBend;
+                    o[5].pos += dir * wind * _WindForce * sin(_Time) * _MiddleBend;
+                    o[6].pos += dir * wind * _WindForce * sin(_Time) * _TopBend;
 
                     [unroll]
                     for (int i = 0; i < 7; i++)

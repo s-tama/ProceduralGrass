@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightTex:
-        m_Texture: {fileID: 2800000, guid: e5d44770cb617ff449e0970918ae7e70, type: 3}
+        m_Texture: {fileID: 2800000, guid: bd146265c6a62d74d807ba44d0dfae75, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -64,11 +64,12 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WindTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 65f56f5e69b91e3438d9965245f584b1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _BottomHeight: 1
+    - _BottomBend: 1
+    - _BottomHeight: 0.3
     - _BottomWidth: 0.5
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -77,9 +78,10 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Height: 1
+    - _Height: 0.1
     - _Metallic: 0
-    - _MiddleHeight: 1
+    - _MiddleBend: 2
+    - _MiddleHeight: 0.4
     - _MiddleWidth: 0.4
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -87,10 +89,12 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TopHeight: 1
-    - _TopWidth: 0.3
+    - _TopBend: 3
+    - _TopHeight: 0.5
+    - _TopWidth: 0.2
     - _UVSec: 0
-    - _Width: 0.1
+    - _Width: 1
+    - _WindForce: 0.1
     - _ZWrite: 1
     m_Colors:
     - _BottomColor: {r: 0, g: 0, b: 0, a: 1}
