@@ -26,23 +26,13 @@ Shader "Custom/ProceduralGrass"
         _BottomHeight("Bottom Height", Range(0, 1)) = 0.3
         _MiddleHeight("Middle Height", Range(0, 1)) = 0.4
         _TopHeight("Top Height", Range(0, 1)) = 0.5
-
-        // 草の各部の曲がり具合
-        _BottomBend("Bottom Bend", Float) = 1
-        _MiddleBend("Middle Bend", Float) = 1
-        _TopBend("Top Bend", Float) = 2
-
-        // 風邪の強さ
-        _WindForce("Wind Force", Float) = 1
-
-        // テクスチャマップ
-        [NoScaleOffset] _HeightTex("Height Texture", 2D) = "gray"{}
-        [NoScaleOffset] _RotationTex("Rotation Texture", 2D) = "gray"{}
-        [NoScaleOffset] _WindTex("Wind Texture", 2D) = "white"{}
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry+1" }
+        Tags 
+        { 
+            "RenderType"="Opaque" 
+        }
         LOD 100
 
         Cull Off
@@ -70,9 +60,6 @@ Shader "Custom/ProceduralGrass"
             {
                 float4 pos : SV_POSITION;
                 float3 normal : NORMAL;
-                float3 height : TEXCOORD0;
-                float3 rotation : TEXCOORD1;
-                float3 wind : TEXCOORD2;
             };
 
             struct g2f
@@ -99,52 +86,22 @@ Shader "Custom/ProceduralGrass"
             // それぞれの曲がり具合（下部、中間部、上部）
             float _BottomBend, _MiddleBend, _TopBend;
 
-            // 曲がる強さ
-            float _WindForce;
-
             // テクスチャマップ
             sampler2D _HeightTex;
             sampler2D _RotationTex;
             sampler2D _WindTex;
-
-            float rand(float2 f) 
-            {
-                return frac(sin(dot(f.xy, float2(12.9898, 78.233))) * 43758.5453);
-            }
-
-            float4x4 rotationMatrixY(float angle)
-            {
-                float4x4 mat = float4x4(
-                    cos(angle), 0, -sin(angle), 0,
-                    0,          1,           0, 0,
-                    sin(angle), 0,  cos(angle), 0,
-                    0,          0,           0, 1
-                    );
-                return mat;
-            }
 
             v2g vert(appdata v)
             {
                 v2g o;
                 o.pos = v.pos;
                 o.normal = v.normal;
-                o.height = tex2Dlod(_HeightTex, float4(v.uv, 0, 0));
-                o.rotation = tex2Dlod(_RotationTex, float4(v.uv, 0, 0));
-                o.wind = tex2Dlod(_WindTex, float4(v.uv, 0, 0));
                 return o;
             }
 
             [maxvertexcount(10)]
             void geom(triangle v2g input[3], inout TriangleStream<g2f> stream)
             {
-                // ビルボード用の行列
-                float4x4 billboardMatY = float4x4(
-                    UNITY_MATRIX_V._m00, UNITY_MATRIX_V._m01, UNITY_MATRIX_V._m02, 0,
-                    UNITY_MATRIX_V._m10, UNITY_MATRIX_V._m11, UNITY_MATRIX_V._m12, 0,
-                    UNITY_MATRIX_V._m20, UNITY_MATRIX_V._m21, UNITY_MATRIX_V._m22, 0,
-                    UNITY_MATRIX_V._m30, UNITY_MATRIX_V._m31, UNITY_MATRIX_V._m32, 1
-                    );
-
                 // 頂点位置
                 float4 p0 = input[0].pos;
                 float4 p1 = input[1].pos;
@@ -159,27 +116,19 @@ Shader "Custom/ProceduralGrass"
                 float4 center = (p0 + p1 + p2) / 3.0;
                 float4 normal = float4((n0 + n1 + n2) / 3.0, 1.0);
 
-                // 各プリミティブの幅、高さを算出
+                // 各プリミティブの幅・高さ
                 float width = _Width;
-                //float height = max(0, sin(_Time));
                 float4 height = _Height;
 
                 float bottomWidth = width * _BottomWidth;
                 float middleWidth = width * _MiddleWidth;
                 float topWidth = width * _TopWidth;
 
-                // 高さを算出（3頂点の平均）
-                float h = (input[0].height + input[1].height + input[2].height) / 3.0;
-                float bottomHeight = h * height * _BottomHeight;
-                float middleHeight = h * height * _MiddleHeight;
+                float bottomHeight = height * _BottomHeight;
+                float middleHeight = height * _MiddleHeight;
                 float topHeight = h * height * _TopHeight;
 
-                // 回転を算出（3頂点の平均）
-                float r = (input[0].rotation + input[1].rotation + input[2].rotation) / 3.0f;
-                r = r - 0.5;
-
-                float4 dir = float4(((p2 - p0) * r).xyz, 1);
-                dir = normalize(dir);
+                float4 dir = _Dir;
 
                 // 草のプリミティブを生成する
                 {
