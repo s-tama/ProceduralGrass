@@ -91,11 +91,6 @@ Shader "Custom/ProceduralGrass"
             sampler2D _RotationTex;
             sampler2D _WindTex;
 
-            void createGround(triangle v2g input[3], inout TriangleStream<g2f> stream)
-            {
-
-            }
-
             v2g vert(appdata v)
             {
                 v2g o;
