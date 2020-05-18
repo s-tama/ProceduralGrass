@@ -91,6 +91,11 @@ Shader "Custom/ProceduralGrass"
             sampler2D _RotationTex;
             sampler2D _WindTex;
 
+            void createGround(triangle v2g input[3], inout TriangleStream<g2f> stream)
+            {
+
+            }
+
             v2g vert(appdata v)
             {
                 v2g o;
@@ -102,6 +107,17 @@ Shader "Custom/ProceduralGrass"
             [maxvertexcount(10)]
             void geom(triangle v2g input[3], inout TriangleStream<g2f> stream)
             {
+                // 地面
+                [unroll]
+                for (int i = 0; i < 3; i++)
+                {
+                    g2f o;
+                    o.pos = UnityObjectToClipPos(input[i].pos);
+                    o.col = _GroundColor;
+                    stream.Append(o);
+                }
+                stream.RestartStrip();
+
                 // 頂点位置
                 float4 p0 = input[0].pos;
                 float4 p1 = input[1].pos;
@@ -126,7 +142,7 @@ Shader "Custom/ProceduralGrass"
 
                 float bottomHeight = height * _BottomHeight;
                 float middleHeight = height * _MiddleHeight;
-                float topHeight = h * height * _TopHeight;
+                float topHeight = height * _TopHeight;
 
                 float4 dir = _Dir;
 
@@ -161,15 +177,6 @@ Shader "Custom/ProceduralGrass"
                     o[6].pos = topPos + (normal * topHeight);
                     o[6].col = _TopColor;
 
-                    // wind
-                    dir = float4(1, 0, 0, 1);
-                    float wind = (input[0].wind, input[1].wind, input[2].wind) / 3.0;
-                    o[2].pos += dir * wind * _WindForce * sin(_Time) * _BottomBend;
-                    o[3].pos += dir * wind * _WindForce * sin(_Time) * _BottomBend;
-                    o[4].pos += dir * wind * _WindForce * sin(_Time) * _MiddleBend;
-                    o[5].pos += dir * wind * _WindForce * sin(_Time) * _MiddleBend;
-                    o[6].pos += dir * wind * _WindForce * sin(_Time) * _TopBend;
-
                     [unroll]
                     for (int i = 0; i < 7; i++)
                     {
@@ -179,18 +186,7 @@ Shader "Custom/ProceduralGrass"
                     stream.RestartStrip();
                 }
 
-                // 地面
-                {
-                    [unroll]
-                    for (int i = 0; i < 3; i++)
-                    {
-                        g2f o;
-                        o.pos = UnityObjectToClipPos(input[i].pos);
-                        o.col = _GroundColor;
-                        stream.Append(o);
-                    }
-                    stream.RestartStrip();
-                }
+                
             }
 
             fixed4 frag(g2f i) : SV_Target
