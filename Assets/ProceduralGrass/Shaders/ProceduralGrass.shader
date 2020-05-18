@@ -11,7 +11,12 @@ Shader "Custom/ProceduralGrass"
         _TopColor("Top Color", Color) = (1, 1, 1, 1)
         _BottomColor("Bottom Color", Color) = (1, 1, 1, 1)
 
+        // 草の生成方向
         _Dir("Dir", Vector) = (1, 0, 0, 1)
+
+        // 草全体のサイズ
+        _Width("Width", Float) = 1
+        _Height("Height", Float) = 1
 
         // 草の各部の幅
         _BottomWidth("Bottom Width", Range(0, 1)) = 0.5
@@ -73,6 +78,8 @@ Shader "Custom/ProceduralGrass"
             // 生成方向
             float4 _Dir;
 
+            // 草全体のサイズ
+            float _Width, _Height;
             // それぞれの幅（下部、中間部、上部）
             float _BottomWidth, _MiddleWidth, _TopWidth;
             // それぞれの高さ（下部、中間部、上部）
@@ -117,13 +124,16 @@ Shader "Custom/ProceduralGrass"
                 float4 normal = float4((n0 + n1 + n2) / 3.0, 1.0);
 
                 // 各プリミティブの幅・高さ
-                float bottomWidth = _BottomWidth;
-                float middleWidth = _MiddleWidth;
-                float topWidth = _TopWidth;
+                float width = _Width;
+                float height = _Height;
 
-                float bottomHeight = _BottomHeight;
-                float middleHeight = _MiddleHeight;
-                float topHeight = _TopHeight;
+                float bottomWidth = width * _BottomWidth;
+                float middleWidth = width * _MiddleWidth;
+                float topWidth = width * _TopWidth;
+
+                float bottomHeight = height * _BottomHeight;
+                float middleHeight = height * _MiddleHeight;
+                float topHeight = height * _TopHeight;
 
                 float4 dir = _Dir;
 
