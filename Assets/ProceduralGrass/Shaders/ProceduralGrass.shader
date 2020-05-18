@@ -83,13 +83,6 @@ Shader "Custom/ProceduralGrass"
             float _BottomWidth, _MiddleWidth, _TopWidth;
             // それぞれの高さ（下部、中間部、上部）
             float _BottomHeight, _MiddleHeight, _TopHeight;
-            // それぞれの曲がり具合（下部、中間部、上部）
-            float _BottomBend, _MiddleBend, _TopBend;
-
-            // テクスチャマップ
-            sampler2D _HeightTex;
-            sampler2D _RotationTex;
-            sampler2D _WindTex;
 
             v2g vert(appdata v)
             {
