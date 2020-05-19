@@ -68,7 +68,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _BottomBend: 1
+    - _BottomBend: 0.6
     - _BottomHeight: 0.3
     - _BottomWidth: 0.5
     - _BumpScale: 1
@@ -80,7 +80,7 @@ Material:
     - _GlossyReflections: 1
     - _Height: 10
     - _Metallic: 0
-    - _MiddleBend: 2
+    - _MiddleBend: 0.8
     - _MiddleHeight: 0.4
     - _MiddleWidth: 0.4
     - _Mode: 0
@@ -89,7 +89,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TopBend: 3
+    - _TopBend: 1
     - _TopHeight: 0.5
     - _TopWidth: 0.3
     - _UVSec: 0

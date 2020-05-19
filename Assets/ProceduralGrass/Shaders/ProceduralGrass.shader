@@ -28,9 +28,18 @@ Shader "Custom/ProceduralGrass"
         _MiddleHeight("Middle Height", Range(0, 1)) = 0.4
         _TopHeight("Top Height", Range(0, 1)) = 0.5
 
+        // 草の各部の曲がり具合
+        _BottomBend("Bottom Bend", Range(0, 1)) = 1
+        _MiddleBend("Middle Bend", Range(0, 1)) = 1
+        _TopBend("Top Bend", Range(0, 1)) = 1
+
+        // 風邪の強さ
+        _WindForce("Wind Force", Float) = 1
+
         // マップ・テクスチャ
         _HeightTex("Height Texture", 2D) = "white"{}
         _RotationTex("Rotation Texture", 2D) = "white"{}
+        _WindTex("Wind Texture", 2D) = "white"{}
     }
     SubShader
     {
@@ -71,6 +80,7 @@ Shader "Custom/ProceduralGrass"
                 float3 normal : NORMAL;
                 float height : TEXCOORD0;
                 float rotation : TEXCOORD1;
+                float3 wind : TEXCOORD2;
             };
 
             struct g2f
@@ -94,10 +104,16 @@ Shader "Custom/ProceduralGrass"
             float _BottomWidth, _MiddleWidth, _TopWidth;
             // それぞれの高さ（下部、中間部、上部）
             float _BottomHeight, _MiddleHeight, _TopHeight;
+            // それぞれの曲がり具合
+            float _BottomBend, _MiddleBend, _TopBend;
+
+            // 風邪の強さ
+            float _WindForce;
 
             // マップ・テクスチャ
             sampler2D _HeightTex;
             sampler2D _RotationTex;
+            sampler2D _WindTex;
 
             v2g vert(appdata v)
             {
@@ -106,6 +122,7 @@ Shader "Custom/ProceduralGrass"
                 o.normal = v.normal;
                 o.height = tex2Dlod(_HeightTex, float4(v.uv, 0, 0)).r;
                 o.rotation = tex2Dlod(_RotationTex, float4(v.uv, 0, 0)).r;
+                o.wind = tex2Dlod(_WindTex, float4(v.uv, 0, 0)).rgb;
                 return o;
             }
 
@@ -185,6 +202,17 @@ Shader "Custom/ProceduralGrass"
                 // Top
                 o[6].pos = (o[5].pos + dir) + (normal * topHeight);
                 o[6].col = _TopColor;
+
+                // 風邪の向きに揺らす
+                float4 wind = float4((input[0].wind + input[1].wind + input[2].wind) / 3.0, 0);
+                wind = wind * 2 - 1;    // -1～1に補正
+
+                float speed = 0.5;
+                o[2].pos += dir * _WindForce * _BottomBend * sin(_Time * speed);
+                o[3].pos += dir * _WindForce * _BottomBend * sin(_Time * speed);
+                o[4].pos += dir * _WindForce * _MiddleBend * sin(_Time * speed);
+                o[5].pos += dir * _WindForce * _MiddleBend * sin(_Time * speed);
+                o[6].pos += dir * _WindForce * _TopBend * sin(_Time * speed);
 
                 [unroll]
                 for (i = 0; i < 7; i++)
