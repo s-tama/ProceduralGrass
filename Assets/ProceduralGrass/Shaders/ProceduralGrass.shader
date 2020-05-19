@@ -208,11 +208,11 @@ Shader "Custom/ProceduralGrass"
                 wind = wind * 2 - 1;    // -1～1に補正
 
                 float speed = 0.5;
-                o[2].pos += dir * _WindForce * _BottomBend * sin(_Time * speed);
-                o[3].pos += dir * _WindForce * _BottomBend * sin(_Time * speed);
-                o[4].pos += dir * _WindForce * _MiddleBend * sin(_Time * speed);
-                o[5].pos += dir * _WindForce * _MiddleBend * sin(_Time * speed);
-                o[6].pos += dir * _WindForce * _TopBend * sin(_Time * speed);
+                o[2].pos += dir * wind * _WindForce * _BottomBend * sin(_Time * speed);
+                o[3].pos += dir * wind * _WindForce * _BottomBend * sin(_Time * speed);
+                o[4].pos += dir * wind * _WindForce * _MiddleBend * sin(_Time * speed);
+                o[5].pos += dir * wind * _WindForce * _MiddleBend * sin(_Time * speed);
+                o[6].pos += dir * wind * _WindForce * _TopBend * sin(_Time * speed);
 
                 [unroll]
                 for (i = 0; i < 7; i++)
