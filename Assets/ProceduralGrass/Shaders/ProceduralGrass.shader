@@ -27,6 +27,9 @@ Shader "Custom/ProceduralGrass"
         _BottomHeight("Bottom Height", Range(0, 1)) = 0.3
         _MiddleHeight("Middle Height", Range(0, 1)) = 0.4
         _TopHeight("Top Height", Range(0, 1)) = 0.5
+
+        // マップ・テクスチャ
+        _HeightTex("Height Texture", 2D) = "white"{}
     }
     SubShader
     {
@@ -61,6 +64,7 @@ Shader "Custom/ProceduralGrass"
             {
                 float4 pos : SV_POSITION;
                 float3 normal : NORMAL;
+                float height : TEXCOORD0;
             };
 
             struct g2f
@@ -85,11 +89,15 @@ Shader "Custom/ProceduralGrass"
             // それぞれの高さ（下部、中間部、上部）
             float _BottomHeight, _MiddleHeight, _TopHeight;
 
+            // マップ・テクスチャ
+            sampler2D _HeightTex;
+
             v2g vert(appdata v)
             {
                 v2g o;
                 o.pos = v.pos;
                 o.normal = v.normal;
+                o.height = tex2Dlod(_HeightTex, float4(v.uv, 0, 0)).r;
                 return o;
             }
 
@@ -124,6 +132,8 @@ Shader "Custom/ProceduralGrass"
                 float4 normal = float4((n0 + n1 + n2) / 3.0, 1.0);
 
                 // 各プリミティブの幅・高さ
+                float h = (input[0].height + input[1].height + input[2].height) / 3.0;
+
                 float width = _Width;
                 float height = _Height;
 
@@ -131,9 +141,9 @@ Shader "Custom/ProceduralGrass"
                 float middleWidth = width * _MiddleWidth;
                 float topWidth = width * _TopWidth;
 
-                float bottomHeight = height * _BottomHeight;
-                float middleHeight = height * _MiddleHeight;
-                float topHeight = height * _TopHeight;
+                float bottomHeight = h * height * _BottomHeight;
+                float middleHeight = h * height * _MiddleHeight;
+                float topHeight = h * height * _TopHeight;
 
                 float4 dir = _Dir;
 
