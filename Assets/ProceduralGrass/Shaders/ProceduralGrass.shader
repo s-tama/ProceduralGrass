@@ -30,6 +30,7 @@ Shader "Custom/ProceduralGrass"
 
         // マップ・テクスチャ
         _HeightTex("Height Texture", 2D) = "white"{}
+        _RotationTex("Rotation Texture", 2D) = "white"{}
     }
     SubShader
     {
@@ -53,6 +54,10 @@ Shader "Custom/ProceduralGrass"
 
             #include "UnityCG.cginc"
 
+            #define PI (3.1415)
+            #define DEG2RAD (PI / 180)
+            #define RAD2DEG (180 / PI)
+
             struct appdata
             {
                 float4 pos : POSITION;
@@ -65,6 +70,7 @@ Shader "Custom/ProceduralGrass"
                 float4 pos : SV_POSITION;
                 float3 normal : NORMAL;
                 float height : TEXCOORD0;
+                float rotation : TEXCOORD1;
             };
 
             struct g2f
@@ -91,6 +97,7 @@ Shader "Custom/ProceduralGrass"
 
             // マップ・テクスチャ
             sampler2D _HeightTex;
+            sampler2D _RotationTex;
 
             v2g vert(appdata v)
             {
@@ -98,6 +105,7 @@ Shader "Custom/ProceduralGrass"
                 o.pos = v.pos;
                 o.normal = v.normal;
                 o.height = tex2Dlod(_HeightTex, float4(v.uv, 0, 0)).r;
+                o.rotation = tex2Dlod(_RotationTex, float4(v.uv, 0, 0)).r;
                 return o;
             }
 
@@ -145,7 +153,10 @@ Shader "Custom/ProceduralGrass"
                 float middleHeight = h * height * _MiddleHeight;
                 float topHeight = h * height * _TopHeight;
 
-                float4 dir = _Dir;
+                // 草の向きを算出
+                float a = (input[0].rotation, input[1].rotation, input[2].rotation) / 3.0;
+                a *= RAD2DEG;
+                float4 dir = float4(cos(a), 0, sin(a), 0);
 
                 // 草のプリミティブを生成する
                 g2f o[7];
