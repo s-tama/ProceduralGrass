@@ -53,7 +53,7 @@ public class Plane : MonoBehaviour
                 uv.Add(new Vector2(x, y));
 
                 // 法線情報の追加
-                normals.Add(new Vector3(0f, -1f, 0f));
+                normals.Add(new Vector3(0f, 1f, 0f));
             }
         }
 
@@ -65,9 +65,9 @@ public class Plane : MonoBehaviour
                 int index = y * _segmentWidth + x;
 
                 int a = index;
-                int b = index + 1;
+                int b = index + _segmentWidth;
                 int c = index + 1 + _segmentWidth;
-                int d = index + _segmentWidth;
+                int d = index + 1;
 
                 indices.AddRange(new int[] { a, b, c });
                 indices.AddRange(new int[] { c, d, a });
