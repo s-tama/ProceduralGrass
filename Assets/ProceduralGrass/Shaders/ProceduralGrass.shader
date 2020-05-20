@@ -204,15 +204,15 @@ Shader "Custom/ProceduralGrass"
                 o[6].col = _TopColor;
 
                 // 風邪の向きに揺らす
-                float4 wind = float4((input[0].wind + input[1].wind + input[2].wind) / 3.0, 0);
+                float wind = float4((input[0].wind + input[1].wind + input[2].wind) / 3.0, 0);
                 wind = wind * 2 - 1;    // -1～1に補正
 
                 float speed = 0.5;
-                o[2].pos += dir * wind * _WindForce * _BottomBend * sin(_Time * speed);
-                o[3].pos += dir * wind * _WindForce * _BottomBend * sin(_Time * speed);
-                o[4].pos += dir * wind * _WindForce * _MiddleBend * sin(_Time * speed);
-                o[5].pos += dir * wind * _WindForce * _MiddleBend * sin(_Time * speed);
-                o[6].pos += dir * wind * _WindForce * _TopBend * sin(_Time * speed);
+                o[2].pos += dir * _WindForce * _BottomBend * sin(_Time * wind);
+                o[3].pos += dir * _WindForce * _BottomBend * sin(_Time * wind);
+                o[4].pos += dir * _WindForce * _MiddleBend * sin(_Time * wind);
+                o[5].pos += dir * _WindForce * _MiddleBend * sin(_Time * wind);
+                o[6].pos += dir * _WindForce * _TopBend * sin(_Time * speed);
 
                 [unroll]
                 for (i = 0; i < 7; i++)

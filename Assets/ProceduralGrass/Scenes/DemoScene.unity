@@ -250,8 +250,8 @@ Camera:
   m_GameObject: {fileID: 1144346918}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -346,8 +346,8 @@ MonoBehaviour:
   _meshFilter: {fileID: 1497772284}
   _meshRenderer: {fileID: 1497772283}
   _material: {fileID: 2100000, guid: 74d99d42c8ca750488e45c4d5bfbc498, type: 2}
-  _segmentWidth: 200
-  _segmentHeight: 200
+  _segmentWidth: 100
+  _segmentHeight: 100
   _size: 100
 --- !u!23 &1497772283
 MeshRenderer:
