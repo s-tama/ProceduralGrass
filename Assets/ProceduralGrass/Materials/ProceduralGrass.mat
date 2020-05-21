@@ -70,7 +70,7 @@ Material:
     m_Floats:
     - _BottomBend: 0.6
     - _BottomHeight: 0.3
-    - _BottomWidth: 0.3
+    - _BottomWidth: 0.5
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -82,7 +82,7 @@ Material:
     - _Metallic: 0
     - _MiddleBend: 0.8
     - _MiddleHeight: 0.4
-    - _MiddleWidth: 0.2
+    - _MiddleWidth: 0.4
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -90,8 +90,8 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TopBend: 1
-    - _TopHeight: 0.5
-    - _TopWidth: 0.1
+    - _TopHeight: 0.4
+    - _TopWidth: 0.3
     - _UVSec: 0
     - _Width: 1
     - _WindForce: 0.1
