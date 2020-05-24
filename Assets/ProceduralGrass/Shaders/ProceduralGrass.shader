@@ -29,9 +29,7 @@ Shader "Custom/ProceduralGrass"
         _TopHeight("Top Height", Range(0, 1)) = 0.5
 
         // 草の各部の曲がり具合
-        _BottomBend("Bottom Bend", Range(0, 1)) = 1
-        _MiddleBend("Middle Bend", Range(0, 1)) = 1
-        _TopBend("Top Bend", Range(0, 1)) = 1
+        _Bend("Bend", Range(-1, 1)) = 0
 
         // 風邪の強さ
         _WindForce("Wind Force", Float) = 1
@@ -40,6 +38,9 @@ Shader "Custom/ProceduralGrass"
         _HeightTex("Height Texture", 2D) = "white"{}
         _RotationTex("Rotation Texture", 2D) = "white"{}
         _WindTex("Wind Texture", 2D) = "white"{}
+
+        // トグル
+        [Toggle(_SIMPLE)] _Simple("Simple", Float) = 1
     }
     SubShader
     {
@@ -61,11 +62,16 @@ Shader "Custom/ProceduralGrass"
             #pragma geometry geom
             #pragma fragment frag
 
+            #pragma shader_feature _SIMPLE
+
             #include "UnityCG.cginc"
 
             #define PI (3.1415)
             #define DEG2RAD (PI / 180)
             #define RAD2DEG (180 / PI)
+
+            #define SEGMENT_NUM (6)                     // 草の分割数
+            #define VERTEX_NUM (SEGMENT_NUM * 2 + 1)    // 草の頂点数
 
             struct appdata
             {
@@ -105,7 +111,7 @@ Shader "Custom/ProceduralGrass"
             // それぞれの高さ（下部、中間部、上部）
             float _BottomHeight, _MiddleHeight, _TopHeight;
             // それぞれの曲がり具合
-            float _BottomBend, _MiddleBend, _TopBend;
+            float _Bend;
 
             // 風邪の強さ
             float _WindForce;
@@ -126,7 +132,7 @@ Shader "Custom/ProceduralGrass"
                 return o;
             }
 
-            [maxvertexcount(10)]
+            [maxvertexcount(VERTEX_NUM + 3)]
             void geom(triangle v2g input[3], inout TriangleStream<g2f> stream)
             {
                 int i;
@@ -158,9 +164,10 @@ Shader "Custom/ProceduralGrass"
 
                 // 各プリミティブの幅・高さ
                 float h = (input[0].height + input[1].height + input[2].height) / 3.0;
+                h *= 0.5;
 
                 float width = _Width;
-                float height = _Height;
+                float height = _Height * h;
 
                 float bottomWidth = width * _BottomWidth;
                 float middleWidth = width * _MiddleWidth;
@@ -175,7 +182,105 @@ Shader "Custom/ProceduralGrass"
                 a *= RAD2DEG;
                 float4 dir = float4(cos(a), 0, sin(a), 0);
 
+                // 風邪の向き
+                float wind = float4((input[0].wind + input[1].wind + input[2].wind) / 3.0, 0);
+
                 // 草のプリミティブを生成する
+                g2f bottom[2];
+
+                // Bottom
+                bottom[0].pos = center + dir * _Width;
+                bottom[0].col = _BottomColor;
+                bottom[1].pos = center - dir * _Width;
+                bottom[1].col = _BottomColor;
+
+                // Top
+                g2f top;
+                top.pos = center + normal * height;
+                top.pos += dir * wind * _WindForce * sin(_Time * 0.1);
+                top.col = _TopColor;
+
+                // BottomとTopの3点を除いた中間地点のポイントを算出
+                g2f middle[VERTEX_NUM - 3];
+                int segmentCount = 1;
+                for (i = 0; i < VERTEX_NUM - 3; i++)
+                {
+                    float delta = (float)segmentCount / (float)SEGMENT_NUM;
+
+                    if (i % 2 == 0)
+                    {
+                        float4 halfPos = bottom[0].pos + (normal * (height * 0.5));
+                        float4 p0 = lerp(bottom[0].pos, halfPos, delta);
+                        float4 p1 = lerp(halfPos, top.pos, delta);
+                        middle[i].pos = lerp(p0, p1, delta);
+                        middle[i].col = lerp(_BottomColor, _TopColor, delta);
+                    }
+                    else
+                    {
+                        float4 halfPos = bottom[1].pos + (normal * (height * 0.5));
+                        float4 p0 = lerp(bottom[1].pos, halfPos, delta);
+                        float4 p1 = lerp(halfPos, top.pos, delta);
+                        middle[i].pos = lerp(p0, p1, delta);
+                        middle[i].col = lerp(_BottomColor, _TopColor, delta);
+                    }
+
+                    if (i % 2 == 0)
+                    {
+                        segmentCount++;
+                    }
+                }
+
+                // ポリゴン生成
+                bottom[0].pos = UnityObjectToClipPos(bottom[0].pos);
+                stream.Append(bottom[0]);
+                bottom[1].pos = UnityObjectToClipPos(bottom[1].pos);
+                stream.Append(bottom[1]);
+
+                for (i = 0; i < VERTEX_NUM - 3; i++)
+                {
+                    middle[i].pos = UnityObjectToClipPos(middle[i].pos);
+                    stream.Append(middle[i]);
+                }
+
+                top.pos = UnityObjectToClipPos(top.pos);
+                stream.Append(top);
+
+                stream.RestartStrip();
+
+                //int count = 0;
+                //int num = SEGMENT_NUM;
+                //for (i = 0; i < num; i++)
+                //{
+                //    for (j = 0; j < 2; j++)
+                //    {
+                //        g2f o;
+                //        if (j == 0)
+                //        {
+                //            o.pos = (center + dir * abs(i - num) * _Width) + (normal * i * _Height);
+                //        }
+                //        else if (j == 1)
+                //        {
+                //            o.pos = (center - dir * abs(i - num) * _Width) + (normal * i * _Height);
+                //        }
+                //        o.col = lerp(_BottomColor, _TopColor, (float)i / num);
+
+                //        // 風邪の向きに揺らす
+                //        o.pos += dir * _WindForce * abs(sin(_Time * i));
+
+                //        o.pos = UnityObjectToClipPos(o.pos);
+                //        stream.Append(o);
+                //    }
+                //    count++;
+                //}
+                //g2f o;
+                //o.pos = center + normal * count * _Height;
+                //o.col = _TopColor;
+                //o.pos = UnityObjectToClipPos(o.pos);
+                //o.pos += dir * _WindForce * abs(sin(_Time * count));
+                //stream.Append(o);
+                //stream.RestartStrip();
+
+                /*
                 g2f o[7];
 
                 // Bottom
@@ -221,6 +326,7 @@ Shader "Custom/ProceduralGrass"
                     stream.Append(o[i]);
                 }
                 stream.RestartStrip();
+                */
             }
 
             fixed4 frag(g2f i) : SV_Target
