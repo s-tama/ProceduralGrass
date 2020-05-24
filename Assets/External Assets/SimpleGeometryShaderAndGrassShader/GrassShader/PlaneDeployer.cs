@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#pragma warning disable CS0649
+
+using UnityEngine;
 
 namespace SimpleGeometryShaderAndGrassShader
 {
