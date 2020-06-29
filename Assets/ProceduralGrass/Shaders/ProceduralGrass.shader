@@ -20,13 +20,13 @@ Shader "Custom/ProceduralGrass"
 
 		// 風の向き
 		_WindDir("Wind Dir", Vector) = (1, 0, 0, 0)
-        // 風邪の強さ
+        // 風の強さ
         _WindForce("Wind Force", Float) = 1
 
         // マップ・テクスチャ
-        _HeightTex("Height Texture", 2D) = "white"{}
-        _RotationTex("Rotation Texture", 2D) = "white"{}
-        _WindTex("Wind Texture", 2D) = "white"{}
+        [NoScaleOffset] _HeightTex("Height Texture", 2D) = "gray"{}
+        [NoScaleOffset] _RotationTex("Rotation Texture", 2D) = "gray"{}
+        [NoScaleOffset] _WindTex("Wind Texture", 2D) = "gray"{}
     }
     SubShader
     {
@@ -72,7 +72,7 @@ Shader "Custom/ProceduralGrass"
                 float3 normal : NORMAL;
                 float height : TEXCOORD0;
                 float rotation : TEXCOORD1;
-                float3 wind : TEXCOORD2;
+                float wind : TEXCOORD2;
             };
 
             struct g2f
@@ -83,8 +83,12 @@ Shader "Custom/ProceduralGrass"
 
             fixed4 _GroundColor, _TopColor, _BottomColor;
             float _Width, _Height;
-			float _WindDir, _WindForce;
+			float4 _WindDir;
+			float _WindForce;
             sampler2D _HeightTex, _RotationTex, _WindTex;
+
+			// グローバル
+			float _DeltaTime;
 
             v2g vert(appdata v)
             {
@@ -135,7 +139,7 @@ Shader "Custom/ProceduralGrass"
 
                 // 各プリミティブの幅・高さ
                 float h = (input[0].height + input[1].height + input[2].height) / 3.0;
-                h *= 0.5;
+                h *= 0.5;	// 高さを調整
 
                 float width = _Width;
                 float height = _Height * h;
@@ -145,8 +149,8 @@ Shader "Custom/ProceduralGrass"
                 a *= RAD2DEG;
                 float4 dir = float4(cos(a), 0, sin(a), 0);
 
-                // 風邪の向き
-                float wind = float4((input[0].wind + input[1].wind + input[2].wind) / 3.0, 0);
+                // 風に揺られる強さ
+                float wind = (input[0].wind + input[1].wind + input[2].wind) / 3.0;
 
                 // 草のプリミティブを生成する
                 g2f bottom[2];
@@ -160,7 +164,7 @@ Shader "Custom/ProceduralGrass"
                 // Top
                 g2f top;
                 top.pos = center + normal * height;
-                top.pos += dir * wind * _WindForce * sin(_Time * 0.1);
+				top.pos += _WindDir * (sin(_Time * wind * _WindForce) * 0.5 + 1) * 0.5;
                 top.col = _TopColor;
 
                 // BottomとTopの3点を除いた中間地点のポイントを算出
